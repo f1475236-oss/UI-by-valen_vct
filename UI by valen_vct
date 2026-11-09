@@ -222,8 +222,7 @@ Q=New(L.Button and'TextButton'or'Frame',{Name='Face',BackgroundColor3=L.Color or
 n.Control,BorderSizePixel=0,ZIndex=2,Parent=O},{Corner(N)})if L.Shade then
 Stroke(t,L.StrokeT or 0.95).Parent=Q Grad(t,L.Shade,90).Parent=Q end if L.Button
 then Q.Text=''Q.AutoButtonColor=false end if L.AutoY then Q.Size=UDim2.new(1,0,0
-,0)Q.AutomaticSize=Enum.AutomaticSize.Y local function sync()O.Size=UDim2.new(1,
-0,0,math.floor(Q.AbsoluteSize.Y/ScaleOf(Q)+0.5)+M)end Q:
+,0)Q.AutomaticSize=Enum.AutomaticSize.Y local last,prev,lockH,lockT,pend=-1,-1,nil,0,false local function sync()if pend then return end pend=true task.defer(function()pend=false local h=Q.AbsoluteSize.Y if h<=0 then return end local sc=math.max(ScaleOf(Q),0.001)local tg=math.floor(h/sc+0.5)+M if lockH and os.clock()<lockT and math.abs(tg-lockH)<=8 then return end if math.abs(tg-last)<=1 then return end if prev>=0 and math.abs(tg-prev)<=2 and math.abs(tg-last)<=40 then local hh=math.max(tg,last) lockH=hh lockT=os.clock()+3 prev=-1 last=hh O.Size=UDim2.new(1,0,0,hh)return end prev=last last=tg lockH=nil O.Size=UDim2.new(1,0,0,tg)end)end Q:
 GetPropertyChangedSignal('AbsoluteSize'):Connect(sync)task.defer(sync)else Q.
 Size=UDim2.fromScale(1,1)end return O,Q,P,M end local K=game:GetService(
 'SoundService')local L='rbxasset://sounds/clickfast.wav'local M=
@@ -1831,28 +1830,7 @@ AutomaticSize.Y,ClipsDescendants=true,LayoutOrder=1,Parent=aC})local aH=New(
 AutomaticSize.Y,Parent=aG},{Pad(4,0,0,0),List(4)})local aI=setmetatable({Body=aH
 ,Card=aC,Holder=aA,_order=0,Tab=self,Window=az,Title=av,Stroke=aD,Collapsed=
 false},ad)table.insert(self.Cards,{Face=aC,Holder=aA,Sec=aI,Sync=function()end})
-local aJ local aK=Instance.new('NumberValue')aK.Changed:Connect(function(aL)
-local aM=math.max(ScaleOf(aG),0.01)aG.Size=UDim2.new(1,0,0,math.floor(aL*aM+0.5)
-/aM)end)function aI:SetCollapsed(aL,aM)if self.Collapsed==aL then return end
-self.Collapsed=aL if aJ then aJ:Cancel()end local aN=math.max(ScaleOf(aH),0.01)
-if not aL and not aH.Visible then aH.Visible=true a.Heartbeat:Wait()if self.
-Collapsed~=aL then return end end local aO=math.floor(aH.AbsoluteSize.Y/aN+0.5)
-if aO<=0 then aO=self._foldFull or 0 end if aL then self._foldFull=aO end local
-aP=math.floor(aG.AbsoluteSize.Y/aN+0.5)Tween(aF,aM and 0 or 0.35,{Rotation=aL
-and-90 or 0},Enum.EasingStyle.Quint)aK.Value=aP aG.Size=UDim2.new(1,0,0,aP)aG.
-AutomaticSize=Enum.AutomaticSize.None if not aM then local aQ={}for aR,aS in
-ipairs(aH:GetDescendants())do if aS:IsA('TextLabel')then table.insert(aQ,aS)if#
-aQ>14 then aQ=nil break end end end if aQ then local aR=aL and 0.6 or 0 for aS,
-aT in ipairs(aQ)do Tween(aT,aL and 0.2 or 0.35,{TextTransparency=aR})end end end
-if aL then aJ=Tween(aK,aM and 0 or 0.3,{Value=0},Enum.EasingStyle.Sine,Enum.
-EasingDirection.InOut)aJ.Completed:Connect(function(aQ)if aQ==Enum.PlaybackState
-.Completed and self.Collapsed then aH.Visible=false end end)else aJ=Tween(aK,aM
-and 0 or 0.34,{Value=aO},Enum.EasingStyle.Sine,Enum.EasingDirection.InOut)aJ.
-Completed:Connect(function(aQ)if aQ~=Enum.PlaybackState.Completed or self.
-Collapsed then return end aG.AutomaticSize=Enum.AutomaticSize.Y a.Heartbeat:
-Wait()if not self.Collapsed then aG.Size=UDim2.new(1,0,0,0)end end)end local aQ=
-az:_layout()aQ.collapsed[pinKey(self)]=aL or nil if not aM then az:
-_saveLayoutSoon()end end local aL,aM,aN,aO,aP local function cardsIn(aQ)local aR
+local aJ local aK=Instance.new('NumberValue')local foldPx=-1 aK.Changed:Connect(function(aL)local aM=math.max(ScaleOf(aG),0.01)local px=math.floor(aL*aM+0.5)/aM if math.abs(px-foldPx)<0.5 then return end foldPx=px aG.Size=UDim2.new(1,0,0,px)end)local function foldHeavy()local c=0 for _,d in ipairs(aH:GetDescendants())do c=c+1 if c>120 then return true end end return false end function aI:SetCollapsed(aL,aM)if self.Collapsed==aL then return end self.Collapsed=aL if aJ then aJ:Cancel()aJ=nil end if foldHeavy()then aM=true end local aN=math.max(ScaleOf(aH),0.01)if not aL and not aH.Visible then aH.Visible=true if not aM then a.Heartbeat:Wait()if self.Collapsed~=aL then return end end end local aO=math.floor(aH.AbsoluteSize.Y/aN+0.5)if aO<=0 then aO=self._foldFull or 0 end if aL then self._foldFull=aO end local aP=math.floor(aG.AbsoluteSize.Y/aN+0.5)Tween(aF,aM and 0 or 0.35,{Rotation=aL and-90 or 0},Enum.EasingStyle.Quint)foldPx=-1 aK.Value=aP aG.Size=UDim2.new(1,0,0,aP)aG.AutomaticSize=Enum.AutomaticSize.None if not aM then local aQ={}for aR,aS in ipairs(aH:GetDescendants())do if aS:IsA('TextLabel')then table.insert(aQ,aS)if#aQ>14 then aQ=nil break end end end if aQ then local aR=aL and 0.6 or 0 for aS,aT in ipairs(aQ)do Tween(aT,aL and 0.2 or 0.35,{TextTransparency=aR})end end end if aL then if aM then aH.Visible=false foldPx=-1 aK.Value=0 aG.Size=UDim2.new(1,0,0,0)else aJ=Tween(aK,0.3,{Value=0},Enum.EasingStyle.Sine,Enum.EasingDirection.InOut)aJ.Completed:Connect(function(aQ)if aQ==Enum.PlaybackState.Completed and self.Collapsed then aH.Visible=false end end)end else if aM then aH.Visible=true aG.AutomaticSize=Enum.AutomaticSize.Y aG.Size=UDim2.new(1,0,0,0)else aJ=Tween(aK,0.34,{Value=aO},Enum.EasingStyle.Sine,Enum.EasingDirection.InOut)aJ.Completed:Connect(function(aQ)if aQ~=Enum.PlaybackState.Completed or self.Collapsed then return end aG.AutomaticSize=Enum.AutomaticSize.Y a.Heartbeat:Wait()if not self.Collapsed then aG.Size=UDim2.new(1,0,0,0)end end)end end local aQ=az:_layout()aQ.collapsed[pinKey(self)]=aL or nil if not aM then az:_saveLayoutSoon()end end local aL,aM,aN,aO,aP local function cardsIn(aQ)local aR
 ={}for aS,aT in ipairs(aQ:GetChildren())do if aT:IsA('Frame')and aT~=aA then
 table.insert(aR,aT)end end table.sort(aR,function(aS,aT)return aS.LayoutOrder<aT
 .LayoutOrder end)return aR end local function makePlaceholder(aQ,aR,aS)local aT=
@@ -1938,7 +1916,7 @@ table.insert(az.Connections,l.InputEnded:Connect(function(aW)if not IsPointer(aW
 _snapTarget then az:_joinFloats(aI,aI._snapTarget)aI._snapTarget=nil end else
 endDrag()end elseif aI._headDown then PlaySound('click')aI:SetCollapsed(not aI.
 Collapsed)end aI._headDown=false end))aE.MouseButton1Down:Connect(function()aI.
-_headDown=true end)aE.MouseLeave:Connect(function()if not aM then aI._headDown=
+_headDown=true end)aE.MouseButton2Click:Connect(function()PlaySound('fold')local want=not aI.Collapsed for _,cd in ipairs(aI.Tab.Cards)do if cd.Sec and cd.Sec.SetCollapsed then pcall(function()cd.Sec:SetCollapsed(want,true)end)end end end)aE.MouseLeave:Connect(function()if not aM then aI._headDown=
 false end end)local aW=New('TextButton',{AutoButtonColor=false,Text='',
 BackgroundColor3=n.Control,BackgroundTransparency=1,AnchorPoint=Vector2.new(1,0)
 ,Position=UDim2.new(1,4,0,-5),Size=UDim2.fromOffset(24,24),ZIndex=3,Parent=aE},{
